@@ -36,7 +36,7 @@ const defaultProducts: Product[] = [
     oldPrice: 1690,
     image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/57c6be5f-a7f6-40a1-ba17-3441ecd3b038.jpg',
     category: 'Футболки',
-    sizes: ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет'],
+    sizes: ['92-98', '104-110', '116-122', '128-134'],
     colors: ['yellow', 'blue', 'white'],
     rating: 4.9,
     reviews: 89,
@@ -51,7 +51,7 @@ const defaultProducts: Product[] = [
     oldPrice: 3290,
     image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/719ff5d6-39cd-4c30-8427-8797bba3eccd.jpg',
     category: 'Платья',
-    sizes: ['2-3 года', '4-5 лет', '6-7 лет'],
+    sizes: ['92-98', '104-110', '116-122'],
     colors: ['pink', 'white', 'lavender'],
     rating: 5.0,
     reviews: 124,
@@ -65,7 +65,7 @@ const defaultProducts: Product[] = [
     price: 1990,
     image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/ad87e5cb-3a5a-4b4f-8bfd-c0ff283b13f9.jpg',
     category: 'Худи',
-    sizes: ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет'],
+    sizes: ['92-98', '104-110', '116-122', '128-134', '140-146'],
     colors: ['mint', 'gray', 'white'],
     rating: 4.8,
     reviews: 67,
@@ -101,8 +101,8 @@ export default function Index() {
   }, []);
   const [activeTab, setActiveTab] = useState('catalog');
 
-  const categories = ['Все', 'Новинки', 'Тренды', 'Футболки', 'Платья', 'Худи'];
-  const allSizes = ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет'];
+  const allCategories = ['Все', 'Новинки', 'Тренды', ...new Set(products.map(p => p.category))];
+  const allSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
 
   const addToCart = (product: Product, size: string) => {
     const existingItem = cart.find(item => item.id === product.id && item.selectedSize === size);
@@ -305,7 +305,7 @@ export default function Index() {
                   <div>
                     <h4 className="font-semibold mb-3">Категория</h4>
                     <div className="space-y-2">
-                      {categories.map((category) => (
+                      {allCategories.map((category) => (
                         <Button
                           key={category}
                           variant={selectedCategory === category ? 'default' : 'ghost'}

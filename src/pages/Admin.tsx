@@ -32,8 +32,7 @@ interface ContactInfo {
   email: string;
 }
 
-const categories = ['Футболки', 'Платья', 'Худи', 'Брюки', 'Куртки', 'Обувь'];
-const availableSizes = ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет', '12-13 лет'];
+const availableSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
 
 export default function Admin() {
   const { toast } = useToast();
@@ -53,7 +52,7 @@ export default function Admin() {
     price: '',
     oldPrice: '',
     image: '',
-    category: categories[0],
+    category: '',
     sizes: [] as string[],
     colors: '',
     rating: '5.0',
@@ -150,7 +149,7 @@ export default function Admin() {
       price: '',
       oldPrice: '',
       image: '',
-      category: categories[0],
+      category: '',
       sizes: [],
       colors: '',
       rating: '5.0',
@@ -167,7 +166,7 @@ export default function Admin() {
       price: product.price.toString(),
       oldPrice: product.oldPrice?.toString() || '',
       image: product.image,
-      category: product.category,
+      category: product.category || '',
       sizes: product.sizes,
       colors: product.colors.join(', '),
       rating: product.rating.toString(),
@@ -344,16 +343,13 @@ export default function Admin() {
 
                 <div>
                   <Label htmlFor="category">Категория *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="Футболки, Платья, Худи..."
+                    required
+                  />
                 </div>
 
                 <div>
@@ -440,7 +436,7 @@ export default function Admin() {
                         price: '',
                         oldPrice: '',
                         image: '',
-                        category: categories[0],
+                        category: '',
                         sizes: [],
                         colors: '',
                         rating: '5.0',

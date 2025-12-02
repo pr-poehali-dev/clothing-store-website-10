@@ -31,44 +31,44 @@ interface CartItem extends Product {
 const products: Product[] = [
   {
     id: 1,
-    name: 'Neo Hoodie Purple',
-    price: 4990,
-    oldPrice: 6990,
-    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/ea673fe9-78cc-4cbc-8bc1-f45cd12f94ba.jpg',
-    category: 'Толстовки',
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    colors: ['purple', 'pink', 'black'],
-    rating: 4.8,
-    reviews: 124,
-    discount: 30,
+    name: 'Футболка "Веселый Зоопарк"',
+    price: 1290,
+    oldPrice: 1690,
+    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/57c6be5f-a7f6-40a1-ba17-3441ecd3b038.jpg',
+    category: 'Футболки',
+    sizes: ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет'],
+    colors: ['yellow', 'blue', 'white'],
+    rating: 4.9,
+    reviews: 89,
+    discount: 25,
     isNew: true,
     isTrending: true
   },
   {
     id: 2,
-    name: 'Cyber Denim Jacket',
-    price: 7990,
-    oldPrice: 9990,
-    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/0cdcc5c0-8d2c-490d-b20f-c9c622d1a330.jpg',
-    category: 'Куртки',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['blue', 'black'],
-    rating: 4.9,
-    reviews: 89,
-    discount: 20,
+    name: 'Платье "Цветочная Поляна"',
+    price: 2490,
+    oldPrice: 3290,
+    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/719ff5d6-39cd-4c30-8427-8797bba3eccd.jpg',
+    category: 'Платья',
+    sizes: ['2-3 года', '4-5 лет', '6-7 лет'],
+    colors: ['pink', 'white', 'lavender'],
+    rating: 5.0,
+    reviews: 124,
+    discount: 25,
+    isNew: true,
     isTrending: true
   },
   {
     id: 3,
-    name: 'Future Sneakers',
-    price: 8990,
-    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/98939dad-1066-44c8-9c9a-2ef8426896d3.jpg',
-    category: 'Обувь',
-    sizes: ['38', '39', '40', '41', '42', '43'],
-    colors: ['orange', 'blue', 'white'],
-    rating: 4.7,
-    reviews: 156,
-    isNew: true,
+    name: 'Худи "Мятный Мишка"',
+    price: 1990,
+    image: 'https://cdn.poehali.dev/projects/f08fb6cc-16bf-44af-999b-6ea8b8a7944e/files/ad87e5cb-3a5a-4b4f-8bfd-c0ff283b13f9.jpg',
+    category: 'Худи',
+    sizes: ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет'],
+    colors: ['mint', 'gray', 'white'],
+    rating: 4.8,
+    reviews: 67,
     isTrending: true
   }
 ];
@@ -80,8 +80,8 @@ export default function Index() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('catalog');
 
-  const categories = ['Все', 'Новинки', 'Тренды', 'Толстовки', 'Куртки', 'Обувь'];
-  const allSizes = ['XS', 'S', 'M', 'L', 'XL'];
+  const categories = ['Все', 'Новинки', 'Тренды', 'Футболки', 'Платья', 'Худи'];
+  const allSizes = ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет'];
 
   const addToCart = (product: Product, size: string) => {
     const existingItem = cart.find(item => item.id === product.id && item.selectedSize === size);
@@ -130,12 +130,12 @@ export default function Index() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-purple-200">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-yellow-50">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-pink-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-              VIBE STORE
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-pink-400 to-yellow-400 bg-clip-text text-transparent flex items-center gap-2">
+              👶 Kids Fashion
             </h1>
             
             <nav className="hidden md:flex gap-6">
@@ -259,11 +259,11 @@ export default function Index() {
 
       {activeTab === 'catalog' && (
         <main className="container mx-auto px-4 py-8">
-          <div className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 p-12 text-white animate-fade-in">
+          <div className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-blue-400 via-pink-400 to-yellow-400 p-12 text-white animate-fade-in">
             <div className="relative z-10">
-              <Badge className="mb-4 bg-white/20 text-white border-white/30">Новая коллекция</Badge>
-              <h2 className="text-5xl font-bold mb-4">Стиль будущего</h2>
-              <p className="text-xl mb-6 text-white/90">Яркие образы для смелых личностей</p>
+              <Badge className="mb-4 bg-white/20 text-white border-white/30">🎉 Новая коллекция</Badge>
+              <h2 className="text-5xl font-bold mb-4">Мода для маленьких героев</h2>
+              <p className="text-xl mb-6 text-white/90">Яркая, удобная и безопасная одежда для детей</p>
               <Button size="lg" variant="secondary" className="font-semibold">
                 Смотреть коллекцию
                 <Icon name="ArrowRight" size={20} className="ml-2" />
@@ -363,13 +363,13 @@ export default function Index() {
                         />
                         <div className="absolute top-3 left-3 flex flex-col gap-2">
                           {product.isNew && (
-                            <Badge className="bg-purple-600">Новинка</Badge>
+                            <Badge className="bg-blue-500">✨ Новинка</Badge>
                           )}
                           {product.isTrending && (
-                            <Badge className="bg-orange-500">Тренд</Badge>
+                            <Badge className="bg-yellow-500 text-yellow-950">🔥 Хит</Badge>
                           )}
                           {product.discount && (
-                            <Badge className="bg-pink-600">-{product.discount}%</Badge>
+                            <Badge className="bg-pink-500">-{product.discount}%</Badge>
                           )}
                         </div>
                       </div>
@@ -424,11 +424,13 @@ export default function Index() {
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="text-4xl font-bold mb-6">О нас</h2>
             <p className="text-lg text-muted-foreground">
-              VIBE STORE — это больше, чем магазин одежды. Мы создаем будущее моды, 
-              объединяя смелый дизайн, яркие цвета и инновационные формы.
+              Kids Fashion — это магазин качественной и стильной детской одежды. 
+              Мы заботимся о комфорте и безопасности вашего ребенка, выбирая только 
+              натуральные ткани и проверенные производители.
             </p>
             <p className="text-lg text-muted-foreground">
-              Наша миссия — помочь вам выразить себя через стиль, который не боится выделяться.
+              Наша миссия — помочь родителям выбрать лучшее для своих детей: 
+              красивое, удобное и доступное по цене.
             </p>
           </div>
         </main>
@@ -467,10 +469,10 @@ export default function Index() {
         </main>
       )}
 
-      <footer className="bg-gradient-to-r from-purple-900 via-pink-900 to-orange-900 text-white py-12 mt-16">
+      <footer className="bg-gradient-to-r from-blue-600 via-pink-500 to-yellow-500 text-white py-12 mt-16">
         <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold mb-4">VIBE STORE</h3>
-          <p className="text-white/80 mb-4">Стиль будущего уже здесь</p>
+          <h3 className="text-2xl font-bold mb-4">👶 Kids Fashion</h3>
+          <p className="text-white/80 mb-4">Счастливое детство начинается здесь</p>
           <div className="flex justify-center gap-4">
             <Button variant="ghost" size="icon" className="text-white hover:text-white hover:bg-white/20">
               <Icon name="Instagram" size={20} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -99,7 +100,35 @@ export default function Index() {
       setContacts(JSON.parse(storedContacts));
     }
   }, []);
+
+  const handleRegister = () => {
+    if (!registerForm.name || !registerForm.email || !registerForm.phone) {
+      toast({
+        title: 'Ошибка',
+        description: 'Заполните все поля',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const users = JSON.parse(localStorage.getItem('kids-fashion-users') || '[]');
+    const newUser = {
+      id: Date.now(),
+      ...registerForm,
+      registeredAt: new Date().toISOString(),
+    };
+    users.push(newUser);
+    localStorage.setItem('kids-fashion-users', JSON.stringify(users));
+    toast({
+      title: 'Регистрация успешна!',
+      description: `Добро пожаловать, ${registerForm.name}!`,
+    });
+    setRegisterForm({ name: '', email: '', phone: '' });
+    setShowRegisterForm(false);
+  };
   const [activeTab, setActiveTab] = useState('catalog');
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [registerForm, setRegisterForm] = useState({ name: '', email: '', phone: '' });
+  const { toast } = useToast();
 
   const allCategories = ['Все', 'Новинки', 'Тренды', ...new Set(products.map(p => p.category))];
   const allSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
@@ -182,9 +211,54 @@ export default function Index() {
             </nav>
 
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="relative">
-                <Icon name="User" size={22} />
-              </Button>
+              <Sheet open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Icon name="User" size={22} />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-lg">
+                  <SheetHeader>
+                    <SheetTitle className="text-2xl font-bold">Регистрация</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-8 space-y-4">
+                    <div>
+                      <label className="text-sm font-semibold mb-2 block">Ваше имя *</label>
+                      <input
+                        type="text"
+                        value={registerForm.name}
+                        onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
+                        placeholder="Иван Иванов"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-2 block">Email *</label>
+                      <input
+                        type="email"
+                        value={registerForm.email}
+                        onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                        placeholder="ivan@example.com"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-2 block">Телефон *</label>
+                      <input
+                        type="tel"
+                        value={registerForm.phone}
+                        onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
+                        placeholder="+7 (999) 123-45-67"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <Button onClick={handleRegister} className="w-full" size="lg">
+                      <Icon name="UserPlus" size={18} className="mr-2" />
+                      Зарегистрироваться
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
               
               <Sheet>
                 <SheetTrigger asChild>

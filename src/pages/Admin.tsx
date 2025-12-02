@@ -32,7 +32,15 @@ interface ContactInfo {
   email: string;
 }
 
-const availableSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  registeredAt: string;
+}
+
+const defaultSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
 
 export default function Admin() {
   const { toast } = useToast();
@@ -40,7 +48,13 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'products' | 'contacts'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'contacts' | 'users' | 'settings'>('products');
+  const [users, setUsers] = useState<User[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>(defaultSizes);
+  const [newSize, setNewSize] = useState('');
+  const [adminPassword, setAdminPassword] = useState('admin123');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [contacts, setContacts] = useState<ContactInfo>({
     address: 'Москва, ул. Модная, 123',
     phone: '+7 (999) 123-45-67',
@@ -71,6 +85,21 @@ export default function Admin() {
     if (storedContacts) {
       setContacts(JSON.parse(storedContacts));
     }
+
+    const storedUsers = localStorage.getItem('kids-fashion-users');
+    if (storedUsers) {
+      setUsers(JSON.parse(storedUsers));
+    }
+
+    const storedSizes = localStorage.getItem('kids-fashion-sizes');
+    if (storedSizes) {
+      setAvailableSizes(JSON.parse(storedSizes));
+    }
+
+    const storedPassword = localStorage.getItem('kids-fashion-admin-password');
+    if (storedPassword) {
+      setAdminPassword(storedPassword);
+    }
     
     const auth = sessionStorage.getItem('admin-auth');
     if (auth === 'true') {
@@ -79,7 +108,7 @@ export default function Admin() {
   }, []);
 
   const handleLogin = () => {
-    if (password === 'admin123') {
+    if (password === adminPassword) {
       setIsAuthenticated(true);
       sessionStorage.setItem('admin-auth', 'true');
       toast({
@@ -203,6 +232,74 @@ export default function Admin() {
     });
   };
 
+  const addNewSize = () => {
+    if (newSize && !availableSizes.includes(newSize)) {
+      const updated = [...availableSizes, newSize];
+      setAvailableSizes(updated);
+      localStorage.setItem('kids-fashion-sizes', JSON.stringify(updated));
+      setNewSize('');
+      toast({
+        title: 'Размер добавлен',
+        description: `Размер ${newSize} добавлен в список`,
+      });
+    }
+  };
+
+  const removeSize = (size: string) => {
+    if (!defaultSizes.includes(size)) {
+      const updated = availableSizes.filter(s => s !== size);
+      setAvailableSizes(updated);
+      localStorage.setItem('kids-fashion-sizes', JSON.stringify(updated));
+      toast({
+        title: 'Размер удалён',
+        description: `Размер ${size} удалён из списка`,
+      });
+    } else {
+      toast({
+        title: 'Ошибка',
+        description: 'Нельзя удалить стандартный размер',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const changePassword = () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароли не совпадают',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароль должен быть минимум 6 символов',
+        variant: 'destructive',
+      });
+      return;
+    }
+    localStorage.setItem('kids-fashion-admin-password', newPassword);
+    setAdminPassword(newPassword);
+    setNewPassword('');
+    setConfirmPassword('');
+    toast({
+      title: 'Пароль изменён',
+      description: 'Новый пароль успешно сохранён',
+    });
+  };
+
+  const deleteUser = (id: number) => {
+    const updated = users.filter(u => u.id !== id);
+    setUsers(updated);
+    localStorage.setItem('kids-fashion-users', JSON.stringify(updated));
+    toast({
+      title: 'Пользователь удалён',
+      description: 'Пользователь успешно удалён из системы',
+    });
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-yellow-50 flex items-center justify-center p-4">
@@ -267,7 +364,7 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-6 flex-wrap">
           <Button
             variant={activeTab === 'products' ? 'default' : 'outline'}
             onClick={() => setActiveTab('products')}
@@ -281,6 +378,20 @@ export default function Admin() {
           >
             <Icon name="Phone" size={18} className="mr-2" />
             Контакты
+          </Button>
+          <Button
+            variant={activeTab === 'users' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('users')}
+          >
+            <Icon name="Users" size={18} className="mr-2" />
+            Пользователи
+          </Button>
+          <Button
+            variant={activeTab === 'settings' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('settings')}
+          >
+            <Icon name="Settings" size={18} className="mr-2" />
+            Настройки
           </Button>
         </div>
 
@@ -353,7 +464,7 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <Label>Размеры *</Label>
+                  <Label>Размеры (ростовка) *</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {availableSizes.map(size => (
                       <Button
@@ -575,6 +686,155 @@ export default function Admin() {
                   <Icon name="Save" size={18} className="mr-2" />
                   Сохранить контакты
                 </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'users' && (
+          <div className="max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Icon name="Users" size={24} />
+                    Зарегистрированные пользователи
+                  </span>
+                  <Badge variant="secondary">{users.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {users.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Icon name="Users" size={64} className="mx-auto mb-4 opacity-20" />
+                    <p>Пока нет зарегистрированных пользователей</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {users.map(user => (
+                      <Card key={user.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-bold">{user.name}</h3>
+                              <div className="text-sm text-muted-foreground space-y-1">
+                                <p className="flex items-center gap-2">
+                                  <Icon name="Mail" size={14} />
+                                  {user.email}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <Icon name="Phone" size={14} />
+                                  {user.phone}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <Icon name="Calendar" size={14} />
+                                  Регистрация: {new Date(user.registeredAt).toLocaleDateString('ru-RU')}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteUser(user.id)}
+                            >
+                              <Icon name="Trash2" size={18} />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="Lock" size={24} />
+                  Изменить пароль администратора
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="newPassword">Новый пароль</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Минимум 6 символов"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Повторите пароль"
+                  />
+                </div>
+                <Button onClick={changePassword} className="w-full">
+                  <Icon name="Save" size={18} className="mr-2" />
+                  Изменить пароль
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="Ruler" size={24} />
+                  Управление размерами
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="newSize">Добавить новый размер</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="newSize"
+                      value={newSize}
+                      onChange={(e) => setNewSize(e.target.value)}
+                      placeholder="Например: 164-170"
+                    />
+                    <Button onClick={addNewSize}>
+                      <Icon name="Plus" size={18} className="mr-2" />
+                      Добавить
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Доступные размеры</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {availableSizes.map(size => (
+                      <div key={size} className="flex items-center gap-1">
+                        <Badge variant={defaultSizes.includes(size) ? 'default' : 'secondary'}>
+                          {size}
+                        </Badge>
+                        {!defaultSizes.includes(size) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => removeSize(size)}
+                          >
+                            <Icon name="X" size={14} />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Стандартные размеры (синие) нельзя удалить
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>

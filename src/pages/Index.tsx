@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
+import { productsApi } from '@/lib/api';
 
 interface Product {
   id: number;
@@ -86,20 +87,42 @@ export default function Index() {
   const [priceRange, setPriceRange] = useState([0, 15000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('kids-fashion-products');
-    if (stored) {
-      const storedProducts = JSON.parse(stored);
-      if (storedProducts.length > 0) {
-        setProducts(storedProducts);
+  const loadProducts = useCallback(async () => {
+    try {
+      const data = await productsApi.getAll();
+      if (data.length > 0) {
+        const formattedProducts: Product[] = data.map(p => ({
+          id: p.id!,
+          name: p.name,
+          price: p.price,
+          oldPrice: undefined,
+          image: p.image || '',
+          category: p.category,
+          sizes: [],
+          colors: [],
+          rating: 5.0,
+          reviews: 0,
+          isNew: false,
+          isTrending: false
+        }));
+        setProducts(formattedProducts);
       }
+    } catch (error) {
+      console.error('Failed to load products:', error);
     }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
     
     const storedContacts = localStorage.getItem('kids-fashion-contacts');
     if (storedContacts) {
       setContacts(JSON.parse(storedContacts));
     }
-  }, []);
+
+    const interval = setInterval(loadProducts, 3000);
+    return () => clearInterval(interval);
+  }, [loadProducts]);
 
   const handleRegister = () => {
     if (!registerForm.name || !registerForm.email || !registerForm.phone) {

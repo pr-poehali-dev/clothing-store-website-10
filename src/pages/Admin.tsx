@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { productsApi } from '@/lib/api';
 
 interface Product {
   id: number;
@@ -78,15 +79,38 @@ export default function Admin() {
   const [showGallery, setShowGallery] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
+  const loadProducts = useCallback(async () => {
+    try {
+      const data = await productsApi.getAll();
+      const formattedProducts: Product[] = data.map(p => ({
+        id: p.id!,
+        name: p.name,
+        price: p.price,
+        oldPrice: undefined,
+        image: p.image || '',
+        category: p.category,
+        sizes: [],
+        colors: [],
+        rating: 5.0,
+        reviews: 0,
+        isNew: false,
+        isTrending: false
+      }));
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      toast({
+        title: 'Ошибка загрузки',
+        description: 'Не удалось загрузить товары из базы данных',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
     const storedImages = localStorage.getItem('kids-fashion-images');
     if (storedImages) {
       setUploadedImages(JSON.parse(storedImages));
-    }
-
-    const stored = localStorage.getItem('kids-fashion-products');
-    if (stored) {
-      setProducts(JSON.parse(stored));
     }
     
     const storedContacts = localStorage.getItem('kids-fashion-contacts');
@@ -113,7 +137,12 @@ export default function Admin() {
     if (auth === 'true') {
       setIsAuthenticated(true);
     }
-  }, []);
+
+    loadProducts();
+
+    const interval = setInterval(loadProducts, 3000);
+    return () => clearInterval(interval);
+  }, [loadProducts]);
 
   const handleLogin = () => {
     if (password === adminPassword) {
@@ -138,62 +167,60 @@ export default function Admin() {
   };
 
   const saveProducts = (newProducts: Product[]) => {
-    localStorage.setItem('kids-fashion-products', JSON.stringify(newProducts));
     setProducts(newProducts);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const price = parseFloat(formData.price);
-    const oldPrice = formData.oldPrice ? parseFloat(formData.oldPrice) : undefined;
-    const discount = oldPrice ? Math.round(((oldPrice - price) / oldPrice) * 100) : undefined;
 
-    const newProduct: Product = {
-      id: editingId || Date.now(),
+    const productData = {
       name: formData.name,
       price,
-      oldPrice,
-      image: formData.image,
+      description: formData.colors,
       category: formData.category,
-      sizes: formData.sizes,
-      colors: formData.colors.split(',').map(c => c.trim()),
-      rating: parseFloat(formData.rating),
-      reviews: parseInt(formData.reviews),
-      discount,
-      isNew: formData.isNew,
-      isTrending: formData.isTrending,
+      image: formData.image,
     };
 
-    if (editingId) {
-      const updated = products.map(p => p.id === editingId ? newProduct : p);
-      saveProducts(updated);
-      toast({
-        title: 'Товар обновлён',
-        description: `${newProduct.name} успешно обновлён`,
+    try {
+      if (editingId) {
+        await productsApi.update(editingId, productData);
+        toast({
+          title: 'Товар обновлён',
+          description: `${productData.name} успешно обновлён`,
+        });
+        setEditingId(null);
+      } else {
+        await productsApi.create(productData);
+        toast({
+          title: 'Товар добавлен',
+          description: `${productData.name} добавлен в каталог`,
+        });
+      }
+
+      await loadProducts();
+
+      setFormData({
+        name: '',
+        price: '',
+        oldPrice: '',
+        image: '',
+        category: '',
+        sizes: [],
+        colors: '',
+        rating: '5.0',
+        reviews: '0',
+        isNew: false,
+        isTrending: false,
       });
-      setEditingId(null);
-    } else {
-      saveProducts([...products, newProduct]);
+    } catch (error) {
       toast({
-        title: 'Товар добавлен',
-        description: `${newProduct.name} добавлен в каталог`,
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось сохранить товар',
+        variant: 'destructive',
       });
     }
-
-    setFormData({
-      name: '',
-      price: '',
-      oldPrice: '',
-      image: '',
-      category: '',
-      sizes: [],
-      colors: '',
-      rating: '5.0',
-      reviews: '0',
-      isNew: false,
-      isTrending: false,
-    });
   };
 
   const handleEdit = (product: Product) => {
@@ -214,13 +241,21 @@ export default function Admin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id: number) => {
-    const updated = products.filter(p => p.id !== id);
-    saveProducts(updated);
-    toast({
-      title: 'Товар удалён',
-      description: 'Товар успешно удалён из каталога',
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await productsApi.delete(id);
+      await loadProducts();
+      toast({
+        title: 'Товар удалён',
+        description: 'Товар успешно удалён из каталога',
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось удалить товар',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

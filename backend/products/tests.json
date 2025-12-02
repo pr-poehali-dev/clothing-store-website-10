@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "name": "Get all products (empty database)",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": [],
+      "bodyMatcher": "exact"
+    },
+    {
+      "name": "Create new product",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Test T-Shirt",
+        "price": 1999.99,
+        "description": "Cotton t-shirt",
+        "category": "Футболки",
+        "image": "https://example.com/image.jpg"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "name": "Test T-Shirt",
+        "price": "1999.99",
+        "category": "Футболки"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create product without required fields",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Incomplete Product"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Name, price, and category are required"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

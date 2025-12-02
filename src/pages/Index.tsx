@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +28,7 @@ interface CartItem extends Product {
   selectedSize: string;
 }
 
-const products: Product[] = [
+const defaultProducts: Product[] = [
   {
     id: 1,
     name: 'Футболка "Веселый Зоопарк"',
@@ -74,10 +74,21 @@ const products: Product[] = [
 ];
 
 export default function Index() {
+  const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
   const [priceRange, setPriceRange] = useState([0, 15000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('kids-fashion-products');
+    if (stored) {
+      const storedProducts = JSON.parse(stored);
+      if (storedProducts.length > 0) {
+        setProducts(storedProducts);
+      }
+    }
+  }, []);
   const [activeTab, setActiveTab] = useState('catalog');
 
   const categories = ['Все', 'Новинки', 'Тренды', 'Футболки', 'Платья', 'Худи'];

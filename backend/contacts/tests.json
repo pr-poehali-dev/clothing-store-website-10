@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "Get contacts",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "address": "string",
+        "phone": "string",
+        "email": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Update contacts",
+      "method": "PUT",
+      "path": "/",
+      "body": {
+        "address": "Test Address",
+        "phone": "+7 (999) 999-99-99",
+        "email": "test@example.com"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "address": "Test Address",
+        "phone": "+7 (999) 999-99-99",
+        "email": "test@example.com"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

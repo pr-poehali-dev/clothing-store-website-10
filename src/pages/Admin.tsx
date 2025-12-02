@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
-import { productsApi } from '@/lib/api';
+import { productsApi, contactsApi, ContactInfo } from '@/lib/api';
 
 interface Product {
   id: number;
@@ -62,6 +62,19 @@ export default function Admin() {
     email: 'hello@vibestore.com'
   });
 
+  const loadContacts = useCallback(async () => {
+    try {
+      const data = await contactsApi.get();
+      setContacts({
+        address: data.address,
+        phone: data.phone,
+        email: data.email
+      });
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -112,11 +125,6 @@ export default function Admin() {
     if (storedImages) {
       setUploadedImages(JSON.parse(storedImages));
     }
-    
-    const storedContacts = localStorage.getItem('kids-fashion-contacts');
-    if (storedContacts) {
-      setContacts(JSON.parse(storedContacts));
-    }
 
     const storedUsers = localStorage.getItem('kids-fashion-users');
     if (storedUsers) {
@@ -139,10 +147,16 @@ export default function Admin() {
     }
 
     loadProducts();
+    loadContacts();
 
-    const interval = setInterval(loadProducts, 3000);
-    return () => clearInterval(interval);
-  }, [loadProducts]);
+    const productsInterval = setInterval(loadProducts, 3000);
+    const contactsInterval = setInterval(loadContacts, 3000);
+    
+    return () => {
+      clearInterval(productsInterval);
+      clearInterval(contactsInterval);
+    };
+  }, [loadProducts, loadContacts]);
 
   const handleLogin = () => {
     if (password === adminPassword) {
@@ -317,12 +331,21 @@ export default function Admin() {
     }));
   };
 
-  const saveContacts = () => {
-    localStorage.setItem('kids-fashion-contacts', JSON.stringify(contacts));
-    toast({
-      title: 'Контакты сохранены',
-      description: 'Контактная информация успешно обновлена',
-    });
+  const saveContacts = async () => {
+    try {
+      await contactsApi.update(contacts);
+      await loadContacts();
+      toast({
+        title: 'Контакты сохранены',
+        description: 'Контактная информация успешно обновлена',
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось сохранить контакты',
+        variant: 'destructive',
+      });
+    }
   };
 
   const addNewSize = () => {

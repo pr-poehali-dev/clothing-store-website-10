@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
-import { productsApi } from '@/lib/api';
+import { productsApi, contactsApi, ContactInfo } from '@/lib/api';
 
 interface Product {
   id: number;
@@ -112,17 +112,31 @@ export default function Index() {
     }
   }, []);
 
+  const loadContacts = useCallback(async () => {
+    try {
+      const data = await contactsApi.get();
+      setContacts({
+        address: data.address,
+        phone: data.phone,
+        email: data.email
+      });
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+    }
+  }, []);
+
   useEffect(() => {
     loadProducts();
-    
-    const storedContacts = localStorage.getItem('kids-fashion-contacts');
-    if (storedContacts) {
-      setContacts(JSON.parse(storedContacts));
-    }
+    loadContacts();
 
-    const interval = setInterval(loadProducts, 3000);
-    return () => clearInterval(interval);
-  }, [loadProducts]);
+    const productsInterval = setInterval(loadProducts, 3000);
+    const contactsInterval = setInterval(loadContacts, 3000);
+    
+    return () => {
+      clearInterval(productsInterval);
+      clearInterval(contactsInterval);
+    };
+  }, [loadProducts, loadContacts]);
 
   const handleRegister = () => {
     if (!registerForm.name || !registerForm.email || !registerForm.phone) {
@@ -234,6 +248,76 @@ export default function Index() {
             </nav>
 
             <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Icon name="Menu" size={24} />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80">
+                  <SheetHeader>
+                    <SheetTitle className="text-2xl font-bold">Меню</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-8 space-y-4">
+                    <Button 
+                      variant={activeTab === 'catalog' ? 'default' : 'ghost'} 
+                      onClick={() => setActiveTab('catalog')}
+                      className="w-full justify-start text-lg"
+                    >
+                      <Icon name="ShoppingBag" size={20} className="mr-2" />
+                      Каталог
+                    </Button>
+                    <Button 
+                      variant={activeTab === 'about' ? 'default' : 'ghost'} 
+                      onClick={() => setActiveTab('about')}
+                      className="w-full justify-start text-lg"
+                    >
+                      <Icon name="Info" size={20} className="mr-2" />
+                      О нас
+                    </Button>
+                    <Button 
+                      variant={activeTab === 'contacts' ? 'default' : 'ghost'} 
+                      onClick={() => setActiveTab('contacts')}
+                      className="w-full justify-start text-lg"
+                    >
+                      <Icon name="Phone" size={20} className="mr-2" />
+                      Контакты
+                    </Button>
+                    
+                    <div className="border-t pt-4 mt-4">
+                      <h3 className="font-semibold mb-3 px-2">Наши контакты</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 px-2">
+                          <Icon name="MapPin" size={20} className="text-primary mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold">Адрес</p>
+                            <p className="text-sm text-muted-foreground">{contacts.address}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 px-2">
+                          <Icon name="Phone" size={20} className="text-primary mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold">Телефон</p>
+                            <a href={`tel:${contacts.phone}`} className="text-sm text-primary hover:underline">
+                              {contacts.phone}
+                            </a>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 px-2">
+                          <Icon name="Mail" size={20} className="text-primary mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold">Email</p>
+                            <a href={`mailto:${contacts.email}`} className="text-sm text-primary hover:underline">
+                              {contacts.email}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
               <Sheet open={showRegisterForm} onOpenChange={setShowRegisterForm}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">

@@ -75,7 +75,15 @@ export default function Admin() {
     isTrending: false,
   });
 
+  const [showGallery, setShowGallery] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+
   useEffect(() => {
+    const storedImages = localStorage.getItem('kids-fashion-images');
+    if (storedImages) {
+      setUploadedImages(JSON.parse(storedImages));
+    }
+
     const stored = localStorage.getItem('kids-fashion-products');
     if (stored) {
       setProducts(JSON.parse(stored));
@@ -212,6 +220,56 @@ export default function Admin() {
     toast({
       title: 'Товар удалён',
       description: 'Товар успешно удалён из каталога',
+    });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Ошибка',
+          description: 'Размер файла не должен превышать 5 МБ',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        const newImages = [...uploadedImages, base64];
+        setUploadedImages(newImages);
+        localStorage.setItem('kids-fashion-images', JSON.stringify(newImages));
+        setFormData({ ...formData, image: base64 });
+        toast({
+          title: 'Изображение загружено',
+          description: 'Изображение успешно добавлено в галерею',
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const selectImageFromGallery = (imageUrl: string) => {
+    setFormData({ ...formData, image: imageUrl });
+    setShowGallery(false);
+    toast({
+      title: 'Изображение выбрано',
+      description: 'Изображение установлено для товара',
+    });
+  };
+
+  const deleteImageFromGallery = (imageUrl: string) => {
+    const newImages = uploadedImages.filter(img => img !== imageUrl);
+    setUploadedImages(newImages);
+    localStorage.setItem('kids-fashion-images', JSON.stringify(newImages));
+    if (formData.image === imageUrl) {
+      setFormData({ ...formData, image: '' });
+    }
+    toast({
+      title: 'Изображение удалено',
+      description: 'Изображение удалено из галереи',
     });
   };
 
@@ -442,14 +500,56 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <Label htmlFor="image">Ссылка на изображение *</Label>
-                  <Input
-                    id="image"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://..."
-                    required
-                  />
+                  <Label>Изображение товара *</Label>
+                  <div className="space-y-3">
+                    {formData.image && (
+                      <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-gray-50">
+                        <img 
+                          src={formData.image} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={() => setFormData({ ...formData, image: '' })}
+                        >
+                          <Icon name="X" size={18} />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => document.getElementById('imageUpload')?.click()}
+                      >
+                        <Icon name="Upload" size={18} className="mr-2" />
+                        Загрузить файл
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setShowGallery(true)}
+                      >
+                        <Icon name="Images" size={18} className="mr-2" />
+                        Из галереи ({uploadedImages.length})
+                      </Button>
+                    </div>
+                    
+                    <input
+                      id="imageUpload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -840,6 +940,72 @@ export default function Admin() {
           </div>
         )}
       </main>
+
+      {showGallery && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="Images" size={24} />
+                Галерея изображений
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowGallery(false)}
+              >
+                <Icon name="X" size={20} />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {uploadedImages.length === 0 ? (
+                <div className="text-center py-12">
+                  <Icon name="ImageOff" size={64} className="mx-auto text-muted-foreground mb-4 opacity-20" />
+                  <p className="text-muted-foreground mb-4">Галерея пуста</p>
+                  <Button onClick={() => {
+                    setShowGallery(false);
+                    document.getElementById('imageUpload')?.click();
+                  }}>
+                    <Icon name="Upload" size={18} className="mr-2" />
+                    Загрузить первое изображение
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {uploadedImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <div 
+                        className="aspect-square border-2 rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                        onClick={() => selectImageFromGallery(img)}
+                      >
+                        <img 
+                          src={img} 
+                          alt={`Gallery ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => deleteImageFromGallery(img)}
+                      >
+                        <Icon name="Trash2" size={16} />
+                      </Button>
+                      {formData.image === img && (
+                        <Badge className="absolute bottom-2 left-2">
+                          <Icon name="Check" size={14} className="mr-1" />
+                          Выбрано
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

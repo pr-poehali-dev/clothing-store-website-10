@@ -77,7 +77,7 @@ const defaultProducts: Product[] = [
 
 export default function Index() {
   const [products, setProducts] = useState<Product[]>(defaultProducts);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // const [cart, setCart] = useState<CartItem[]>([]);
   const [contacts, setContacts] = useState({
     address: 'Москва, ул. Модная, 123',
     phone: '+7 (999) 123-45-67',
@@ -156,40 +156,40 @@ export default function Index() {
   const allCategories = ['Все', 'Новинки', 'Тренды', ...new Set(products.map(p => p.category))];
   const allSizes = ['80-86', '92-98', '104-110', '116-122', '128-134', '140-146', '152-158'];
 
-  const addToCart = (product: Product, size: string) => {
-    const existingItem = cart.find(item => item.id === product.id && item.selectedSize === size);
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.id === product.id && item.selectedSize === size
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1, selectedSize: size }]);
-    }
-  };
+  // const addToCart = (product: Product, size: string) => {
+  //   const existingItem = cart.find(item => item.id === product.id && item.selectedSize === size);
+  //   if (existingItem) {
+  //     setCart(cart.map(item =>
+  //       item.id === product.id && item.selectedSize === size
+  //         ? { ...item, quantity: item.quantity + 1 }
+  //         : item
+  //     ));
+  //   } else {
+  //     setCart([...cart, { ...product, quantity: 1, selectedSize: size }]);
+  //   }
+  // };
 
-  const removeFromCart = (productId: number, size: string) => {
-    setCart(cart.filter(item => !(item.id === productId && item.selectedSize === size)));
-  };
+  // const removeFromCart = (productId: number, size: string) => {
+  //   setCart(cart.filter(item => !(item.id === productId && item.selectedSize === size)));
+  // };
 
-  const updateQuantity = (productId: number, size: string, quantity: number) => {
-    if (quantity === 0) {
-      removeFromCart(productId, size);
-    } else {
-      setCart(cart.map(item =>
-        item.id === productId && item.selectedSize === size
-          ? { ...item, quantity }
-          : item
-      ));
-    }
-  };
+  // const updateQuantity = (productId: number, size: string, quantity: number) => {
+  //   if (quantity === 0) {
+  //     removeFromCart(productId, size);
+  //   } else {
+  //     setCart(cart.map(item =>
+  //       item.id === productId && item.selectedSize === size
+  //         ? { ...item, quantity }
+  //         : item
+  //     ));
+  //   }
+  // };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalDiscount = cart.reduce((sum, item) => {
-    const itemDiscount = item.oldPrice ? (item.oldPrice - item.price) * item.quantity : 0;
-    return sum + itemDiscount;
-  }, 0);
+  // const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // const totalDiscount = cart.reduce((sum, item) => {
+  //   const itemDiscount = item.oldPrice ? (item.oldPrice - item.price) * item.quantity : 0;
+  //   return sum + itemDiscount;
+  // }, 0);
 
   const filteredProducts = products.filter(product => {
     if (selectedCategory !== 'Все') {
@@ -283,93 +283,7 @@ export default function Index() {
                 </SheetContent>
               </Sheet>
               
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Icon name="ShoppingCart" size={22} />
-                    {cart.length > 0 && (
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">
-                        {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                      </Badge>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-lg">
-                  <SheetHeader>
-                    <SheetTitle className="text-2xl font-bold">Корзина</SheetTitle>
-                  </SheetHeader>
-                  
-                  <div className="mt-8 space-y-4">
-                    {cart.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Icon name="ShoppingBag" size={64} className="mx-auto text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground">Корзина пуста</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="space-y-4 max-h-[50vh] overflow-auto">
-                          {cart.map((item) => (
-                            <Card key={`${item.id}-${item.selectedSize}`}>
-                              <CardContent className="p-4">
-                                <div className="flex gap-4">
-                                  <img 
-                                    src={item.image} 
-                                    alt={item.name}
-                                    className="w-20 h-20 object-cover rounded-lg"
-                                  />
-                                  <div className="flex-1">
-                                    <h4 className="font-semibold">{item.name}</h4>
-                                    <p className="text-sm text-muted-foreground">Размер: {item.selectedSize}</p>
-                                    <div className="flex items-center justify-between mt-2">
-                                      <span className="font-bold text-primary">{item.price} ₽</span>
-                                      <div className="flex items-center gap-2">
-                                        <Button 
-                                          size="icon" 
-                                          variant="outline"
-                                          className="h-7 w-7"
-                                          onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity - 1)}
-                                        >
-                                          <Icon name="Minus" size={14} />
-                                        </Button>
-                                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                                        <Button 
-                                          size="icon" 
-                                          variant="outline"
-                                          className="h-7 w-7"
-                                          onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity + 1)}
-                                        >
-                                          <Icon name="Plus" size={14} />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                        
-                        <div className="border-t pt-4 space-y-2">
-                          {totalDiscount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Скидка</span>
-                              <span className="text-green-600 font-semibold">-{totalDiscount} ₽</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between text-lg font-bold">
-                            <span>Итого</span>
-                            <span className="text-primary">{totalPrice} ₽</span>
-                          </div>
-                        </div>
-                        
-                        <Button className="w-full" size="lg">
-                          Оформить заказ
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
+
             </div>
           </div>
         </div>
@@ -515,15 +429,9 @@ export default function Index() {
                           <p className="text-sm font-semibold mb-2">Размеры:</p>
                           <div className="flex flex-wrap gap-2">
                             {product.sizes.map((size) => (
-                              <Button
-                                key={size}
-                                size="sm"
-                                variant="outline"
-                                onClick={() => addToCart(product, size)}
-                                className="hover:bg-primary hover:text-primary-foreground"
-                              >
+                              <Badge key={size} variant="outline">
                                 {size}
-                              </Button>
+                              </Badge>
                             ))}
                           </div>
                         </div>

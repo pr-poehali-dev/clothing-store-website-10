@@ -45,7 +45,7 @@ export const productsApi = {
   },
 
   async update(id: number, product: Partial<Product>): Promise<Product> {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const response = await fetch(`${API_BASE_URL}?id=${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export const productsApi = {
   },
 
   async delete(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const response = await fetch(`${API_BASE_URL}?id=${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

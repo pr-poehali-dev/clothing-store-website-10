@@ -99,8 +99,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         # PUT - обновить товар
         elif method == 'PUT':
-            path_params = event.get('pathParams', {})
-            product_id = path_params.get('id')
+            query_params = event.get('queryStringParameters', {})
+            path = event.get('path', '')
+            
+            # Извлекаем ID из пути или query параметров
+            product_id = None
+            if '/' in path:
+                parts = path.strip('/').split('/')
+                if len(parts) > 0 and parts[-1].isdigit():
+                    product_id = parts[-1]
+            
+            if not product_id:
+                product_id = query_params.get('id')
             
             if not product_id:
                 return {
@@ -159,8 +169,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         # DELETE - удалить товар
         elif method == 'DELETE':
-            path_params = event.get('pathParams', {})
-            product_id = path_params.get('id')
+            query_params = event.get('queryStringParameters', {})
+            path = event.get('path', '')
+            
+            # Извлекаем ID из пути или query параметров
+            product_id = None
+            if '/' in path:
+                parts = path.strip('/').split('/')
+                if len(parts) > 0 and parts[-1].isdigit():
+                    product_id = parts[-1]
+            
+            if not product_id:
+                product_id = query_params.get('id')
             
             if not product_id:
                 return {

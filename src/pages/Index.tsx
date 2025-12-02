@@ -76,6 +76,11 @@ const defaultProducts: Product[] = [
 export default function Index() {
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [contacts, setContacts] = useState({
+    address: 'Москва, ул. Модная, 123',
+    phone: '+7 (999) 123-45-67',
+    email: 'hello@vibestore.com'
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
   const [priceRange, setPriceRange] = useState([0, 15000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -87,6 +92,11 @@ export default function Index() {
       if (storedProducts.length > 0) {
         setProducts(storedProducts);
       }
+    }
+    
+    const storedContacts = localStorage.getItem('kids-fashion-contacts');
+    if (storedContacts) {
+      setContacts(JSON.parse(storedContacts));
     }
   }, []);
   const [activeTab, setActiveTab] = useState('catalog');
@@ -457,21 +467,21 @@ export default function Index() {
                   <Icon name="MapPin" size={24} className="text-primary mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Адрес</h3>
-                    <p className="text-muted-foreground">Москва, ул. Модная, 123</p>
+                    <p className="text-muted-foreground">{contacts.address}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <Icon name="Phone" size={24} className="text-primary mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Телефон</h3>
-                    <p className="text-muted-foreground">+7 (999) 123-45-67</p>
+                    <p className="text-muted-foreground">{contacts.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <Icon name="Mail" size={24} className="text-primary mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-muted-foreground">hello@vibestore.com</p>
+                    <p className="text-muted-foreground">{contacts.email}</p>
                   </div>
                 </div>
               </div>

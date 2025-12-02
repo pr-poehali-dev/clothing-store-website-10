@@ -26,6 +26,12 @@ interface Product {
   isTrending?: boolean;
 }
 
+interface ContactInfo {
+  address: string;
+  phone: string;
+  email: string;
+}
+
 const categories = ['Футболки', 'Платья', 'Худи', 'Брюки', 'Куртки', 'Обувь'];
 const availableSizes = ['2-3 года', '4-5 лет', '6-7 лет', '8-9 лет', '10-11 лет', '12-13 лет'];
 
@@ -35,6 +41,12 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'products' | 'contacts'>('products');
+  const [contacts, setContacts] = useState<ContactInfo>({
+    address: 'Москва, ул. Модная, 123',
+    phone: '+7 (999) 123-45-67',
+    email: 'hello@vibestore.com'
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -54,6 +66,11 @@ export default function Admin() {
     const stored = localStorage.getItem('kids-fashion-products');
     if (stored) {
       setProducts(JSON.parse(stored));
+    }
+    
+    const storedContacts = localStorage.getItem('kids-fashion-contacts');
+    if (storedContacts) {
+      setContacts(JSON.parse(storedContacts));
     }
     
     const auth = sessionStorage.getItem('admin-auth');
@@ -179,6 +196,14 @@ export default function Admin() {
     }));
   };
 
+  const saveContacts = () => {
+    localStorage.setItem('kids-fashion-contacts', JSON.stringify(contacts));
+    toast({
+      title: 'Контакты сохранены',
+      description: 'Контактная информация успешно обновлена',
+    });
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-yellow-50 flex items-center justify-center p-4">
@@ -243,6 +268,24 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <div className="flex gap-4 mb-6">
+          <Button
+            variant={activeTab === 'products' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('products')}
+          >
+            <Icon name="Package" size={18} className="mr-2" />
+            Товары
+          </Button>
+          <Button
+            variant={activeTab === 'contacts' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('contacts')}
+          >
+            <Icon name="Phone" size={18} className="mr-2" />
+            Контакты
+          </Button>
+        </div>
+
+        {activeTab === 'products' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="h-fit">
             <CardHeader>
@@ -492,6 +535,54 @@ export default function Admin() {
             </Card>
           </div>
         </div>
+        )}
+
+        {activeTab === 'contacts' && (
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="Phone" size={24} />
+                  Контактная информация
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="address">Адрес</Label>
+                  <Input
+                    id="address"
+                    value={contacts.address}
+                    onChange={(e) => setContacts({ ...contacts, address: e.target.value })}
+                    placeholder="Москва, ул. Модная, 123"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Телефон</Label>
+                  <Input
+                    id="phone"
+                    value={contacts.phone}
+                    onChange={(e) => setContacts({ ...contacts, phone: e.target.value })}
+                    placeholder="+7 (999) 123-45-67"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={contacts.email}
+                    onChange={(e) => setContacts({ ...contacts, email: e.target.value })}
+                    placeholder="hello@kidsfashion.com"
+                  />
+                </div>
+                <Button onClick={saveContacts} className="w-full">
+                  <Icon name="Save" size={18} className="mr-2" />
+                  Сохранить контакты
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
